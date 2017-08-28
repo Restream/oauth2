@@ -95,6 +95,10 @@ module OAuth2
       connection.response :logger, ::Logger.new($stdout) if ENV['OAUTH_DEBUG'] == 'true'
 
       url = connection.build_url(url, opts[:params]).to_s
+      # Em-http-request иногда не может прочитать gzip от Google
+      # TODO: Выяснить почему и убрать этот костыль
+      opts[:headers] ||= {}
+      opts[:headers]["Accept-Encoding"] = "deflate;q=1, gzip;q=0"
 
       response = connection.run_request(verb, url, opts[:body], opts[:headers]) do |req|
         yield(req) if block_given?
